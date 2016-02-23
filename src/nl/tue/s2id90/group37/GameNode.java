@@ -35,22 +35,4 @@ public class GameNode {
     public void setBestMove(Move bestMove) {
         this.bestMove = bestMove;
     }
-
-    int evaluate(DraughtsState ds) {
-//obtain pieces array
-        int[] pieces = ds.getPieces();
-        int computedValue = 0;
-// compute a value for this state, e.g.
-// by compareing p[i] to WHITEPIECE, WHITEKING, etc
-        for (int k = 0; k < pieces.length; k++) {
-            if (pieces[k] == 1) {
-                computedValue ++;
-            }
-            if(pieces[k] == 3){
-                computedValue =+ 5;
-            }
-        }
-        return computedValue;
-    }
-
 }

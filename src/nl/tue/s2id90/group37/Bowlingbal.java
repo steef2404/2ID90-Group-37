@@ -23,6 +23,11 @@ public class Bowlingbal extends DraughtsPlayer {
 
     private boolean stopped;
 
+    @Override
+    public void stop() {
+        stopped = true;
+    }
+
     int alphaBeta(GameNode node, int alpha, int beta, int depth)
             throws AIStoppedException {
         if (stopped) {
@@ -34,7 +39,8 @@ public class Bowlingbal extends DraughtsPlayer {
         Move bestMove = null;
         int bestScore = Integer.MIN_VALUE;
         if (depth == 0) {
-            return node.evaluate();
+            System.out.println("diepte 0");
+            return evaluate((DraughtsState) node.getGameState());
         }
         if (moves.size() == 1) {                //if only 1 move is possible do it
             bestMove = moves.get(0);
@@ -44,17 +50,20 @@ public class Bowlingbal extends DraughtsPlayer {
 //recursivecall     
                 if (depth % 2 == 0) {              //if even depth, max alpha
                     alpha = Math.max(alpha, alphaBeta(node, alpha, beta, depth - 1));
+                    System.out.println("max alpha, alpha = " + alpha);
                     if (alpha >= beta) {
                         state.undoMove(move);
                         return beta;
                     }
                 } else {                            // else minimize beta
                     beta = Math.min(beta, alphaBeta(node, alpha, beta, depth - 1));
+                    System.out.println("min beta, beta = " + beta);
                     if (alpha >= beta) {
                         state.undoMove(move);
                         return alpha;
                     }
                 }
+                System.out.println(alpha + " = alpha" + bestScore + " = bestScore");
                 if (alpha > bestScore) {            //only set move as best if the alpha is better
                     bestMove = move;
                     bestScore = alpha;
@@ -62,16 +71,59 @@ public class Bowlingbal extends DraughtsPlayer {
                 state.undoMove(move);
             }
         }
+        System.out.println("set best move");
+        System.out.println(bestMove.toString() + "move");
         node.setBestMove(bestMove);
         if (depth % 2 == 0) {
             return alpha;
         }
         return beta;
-
     }
+
+    int evaluate(DraughtsState ds) {
+//obtain pieces array
+        int[] pieces = ds.getPieces();
+        int computedValue = 0;
+// compute a value for this state, e.g.
+// by compareing p[i] to WHITEPIECE, WHITEKING, etc
+        for (int k = 0; k < pieces.length; k++) {
+            if (ds.isWhiteToMove()) {
+                if (pieces[k] == 1) {   //count white pieces
+                    computedValue++;
+                }
+                if (pieces[k] == 3) {       //count white kings
+                    computedValue = +5;
+                }
+            }
+            if (!(ds.isWhiteToMove())) {        //count black pieces
+                if (pieces[k] == 2) {
+                    computedValue++;
+                }
+                if (pieces[k] == 4) {       //count black kings
+                    computedValue = +5;
+                }
+            }
+        }
+        System.out.println("computedValue = " + computedValue);
+        return computedValue;
+    }
+
+    Move bestMove;
 
     @Override
     public Move getMove(DraughtsState s) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        GameNode node = new GameNode(s);
+        while (true) {
+            try {
+                System.out.println("nu alphabeta");
+                alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 2); //find best move
+                System.out.println("klaar alphabeta");
+                bestMove = node.getBestMove();
+                System.out.println("stop");
+                stop();
+            } catch (AIStoppedException e) {
+                return bestMove;
+            }
+        }
     }
 }
