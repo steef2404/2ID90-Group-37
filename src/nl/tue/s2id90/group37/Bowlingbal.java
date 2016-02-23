@@ -28,56 +28,61 @@ public class Bowlingbal extends DraughtsPlayer {
         stopped = true;
     }
 
-    int alphaBeta(GameNode node, int alpha, int beta, int depth)
+    int value = 0;
+
+    @Override
+    public Integer getValue() {
+        return value; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    int alphaBeta(GameNode node, int alpha, int beta, int depth, int limit, boolean maximize)
             throws AIStoppedException {
         if (stopped) {
             stopped = false;
             throw new AIStoppedException();
         }
         GameState state = node.getGameState();
-        List<Move> moves = state.getMoves();
-        Move bestMove = null;
-        int bestScore = Integer.MIN_VALUE;
-        if (depth == 0) {
-            System.out.println("diepte 0");
-            return evaluate((DraughtsState) node.getGameState());
+
+        if (state.isEndState() || depth > limit) {
+            return evaluate((DraughtsState) state);
         }
-        if (moves.size() == 1) {                //if only 1 move is possible do it
-            bestMove = moves.get(0);
-        } else {
-            for (Move move : moves) {
-                state.doMove(move);
-//recursivecall     
-                if (depth % 2 == 0) {              //if even depth, max alpha
-                    alpha = Math.max(alpha, alphaBeta(node, alpha, beta, depth - 1));
-                    System.out.println("max alpha, alpha = " + alpha);
-                    if (alpha >= beta) {
-                        state.undoMove(move);
-                        return beta;
-                    }
-                } else {                            // else minimize beta
-                    beta = Math.min(beta, alphaBeta(node, alpha, beta, depth - 1));
-                    System.out.println("min beta, beta = " + beta);
-                    if (alpha >= beta) {
-                        state.undoMove(move);
-                        return alpha;
-                    }
-                }
-                System.out.println(alpha + " = alpha" + bestScore + " = bestScore");
-                if (alpha > bestScore) {            //only set move as best if the alpha is better
+
+        List<Move> moves = state.getMoves();
+        Move bestMove = moves.get(0);
+
+        for (Move move : moves) {
+            state.doMove(move);
+            GameNode newNode = new GameNode(state);
+            int temp = alphaBeta(newNode, alpha, beta, depth + 1, limit, !maximize);
+            state.undoMove(move);
+
+            if (maximize) {
+                if (temp > alpha) {
+                    alpha = temp;
                     bestMove = move;
-                    bestScore = alpha;
                 }
-                state.undoMove(move);
+            } else {
+                if (temp < beta) {
+                    beta = temp;
+                }
+            }
+            if (alpha >= beta) {
+                node.setBestMove(bestMove);
+                if (maximize) {
+                    return beta;
+                } else {
+                    return alpha;
+                }
             }
         }
-        System.out.println("set best move");
-        System.out.println(bestMove.toString() + "move");
+
         node.setBestMove(bestMove);
-        if (depth % 2 == 0) {
+        if (maximize) {
             return alpha;
+        } else {
+            return beta;
         }
-        return beta;
+
     }
 
     int evaluate(DraughtsState ds) {
@@ -92,7 +97,7 @@ public class Bowlingbal extends DraughtsPlayer {
                     computedValue++;
                 }
                 if (pieces[k] == 3) {       //count white kings
-                    computedValue = +5;
+                    computedValue += 5;
                 }
             }
             if (!(ds.isWhiteToMove())) {        //count black pieces
@@ -100,7 +105,7 @@ public class Bowlingbal extends DraughtsPlayer {
                     computedValue++;
                 }
                 if (pieces[k] == 4) {       //count black kings
-                    computedValue = +5;
+                    computedValue += 5;
                 }
             }
         }
@@ -113,17 +118,21 @@ public class Bowlingbal extends DraughtsPlayer {
     @Override
     public Move getMove(DraughtsState s) {
         GameNode node = new GameNode(s);
-        while (true) {
-            try {
-                System.out.println("nu alphabeta");
-                alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 2); //find best move
-                System.out.println("klaar alphabeta");
-                bestMove = node.getBestMove();
-                System.out.println("stop");
-                stop();
-            } catch (AIStoppedException e) {
-                return bestMove;
+
+        try {
+            while (true) {
+                int limit = 2;
+                while (true) {
+                    System.out.println("nu alphabeta");
+                    value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
+                    limit++;
+                    System.out.println("klaar alphabeta");
+                    bestMove = node.getBestMove();
+                }
             }
+        } catch (AIStoppedException e) {
+            //do nothing
         }
+        return bestMove;
     }
 }
