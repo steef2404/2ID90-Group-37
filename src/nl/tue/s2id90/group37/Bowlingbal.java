@@ -59,6 +59,10 @@ public class Bowlingbal extends DraughtsPlayer {
         List<Move> moves = state.getMoves();        //get all moves
         Move bestMove = moves.get(0);               //set best move random
 
+        if (moves.size() == 1) {
+            return evaluate((DraughtsState) state);
+        }
+
         for (Move move : moves) {
             state.doMove(move);
             GameNode newNode = new GameNode(state);
@@ -104,7 +108,23 @@ public class Bowlingbal extends DraughtsPlayer {
 // compute a value for this state
         for (int k = 0; k < pieces.length; k++) {
             if (ds.isWhiteToMove()) {
+                System.out.println("wit");
+                if (k % 10 == 5 || k % 10 == 6) {       //edges of board
                 if (pieces[k] == 1) {   //count white pieces
+                    computedValue += 4;
+                }
+                if (pieces[k] == 3) {       //count white kings
+                    computedValue += 7;
+                }
+                if (pieces[k] == 2) {
+                    computedValue -= 4;        //count black pieces
+                }
+                if (pieces[k] == 4) {       //count black kings
+                    computedValue -= 7;
+                }
+                }
+                else {
+                                    if (pieces[k] == 1) {   //count white pieces
                     computedValue++;
                 }
                 if (pieces[k] == 3) {       //count white kings
@@ -116,23 +136,41 @@ public class Bowlingbal extends DraughtsPlayer {
                 if (pieces[k] == 4) {       //count black kings
                     computedValue -= 5;
                 }
+                }
             }
-            if (!(ds.isWhiteToMove())) {        
-                if (pieces[k] == 2) {       //count black pieces
-                    computedValue++;
+            if (!(ds.isWhiteToMove())) {
+                System.out.println("zwart");
+                if (k % 10 == 5 || k % 10 == 6) {       //edges of board
+                    if (pieces[k] == 2) {       //count black pieces
+                        computedValue += 4;
+                    }
+                    if (pieces[k] == 4) {       //count black kings
+                        computedValue += 7;
+                    }
+                    if (pieces[k] == 1) {       //count white pieces
+                        computedValue -= 4;
+                    }
+                    if (pieces[k] == 3) {       //count white kings
+                        computedValue -= 7;
+                    }
                 }
-                if (pieces[k] == 4) {       //count black kings
-                    computedValue += 5;
-                }
-                if (pieces[k] == 1) {       //count white pieces
-                    computedValue--;
-                }
-                if (pieces[k] == 3) {       //count white kings
-                    computedValue -= 5;
+                else {
+                    if (pieces[k] == 2) {       //count black pieces
+                        computedValue += 1;
+                    }
+                    if (pieces[k] == 4) {       //count black kings
+                        computedValue += 5;
+                    }
+                    if (pieces[k] == 1) {       //count white pieces
+                        computedValue -= 1;
+                    }
+                    if (pieces[k] == 3) {       //count white kings
+                        computedValue -= 5;
+                    }
                 }
             }
         }
-        System.out.println("computedValue = " + computedValue);
+        //System.out.println("computedValue = " + computedValue);
         return computedValue;
     }
 
@@ -143,15 +181,13 @@ public class Bowlingbal extends DraughtsPlayer {
         GameNode node = new GameNode(s);
 
         try {
+            int limit = 2;
             while (true) {
-                int limit = 2;
-                while (true) {
-                    System.out.println("nu alphabeta");
-                    value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
-                    limit++;
-                    System.out.println("klaar alphabeta");
-                    bestMove = node.getBestMove();
-                }
+                //System.out.println("nu alphabeta");
+                value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
+                limit++;
+                //System.out.println("limit= " + limit);
+                bestMove = node.getBestMove();
             }
         } catch (AIStoppedException e) {
             //do nothing
