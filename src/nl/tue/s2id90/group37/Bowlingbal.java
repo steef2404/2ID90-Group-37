@@ -23,45 +23,54 @@ public class Bowlingbal extends DraughtsPlayer {
 
     private boolean stopped;
 
+    /*
+     Method for interrupting
+     */
     @Override
     public void stop() {
         stopped = true;
     }
 
-    int value = 0;
+    int value = 0;  //value in GUI
 
+    /*
+     Method to set value in GUI
+     */
     @Override
     public Integer getValue() {
         return value; //To change body of generated methods, choose Tools | Templates.
     }
 
+    /*
+     AlphaBeta method for recursive searching
+     */
     int alphaBeta(GameNode node, int alpha, int beta, int depth, int limit, boolean maximize)
             throws AIStoppedException {
-        if (stopped) {
+        if (stopped) {  //interrupt
             stopped = false;
             throw new AIStoppedException();
         }
-        GameState state = node.getGameState();
+        GameState state = node.getGameState();      //get state
 
-        if (state.isEndState() || depth > limit) {
+        if (state.isEndState() || depth > limit) {  //if it is the last state or the depth is over the limit return last evaluate
             return evaluate((DraughtsState) state);
         }
 
-        List<Move> moves = state.getMoves();
-        Move bestMove = moves.get(0);
+        List<Move> moves = state.getMoves();        //get all moves
+        Move bestMove = moves.get(0);               //set best move random
 
         for (Move move : moves) {
             state.doMove(move);
             GameNode newNode = new GameNode(state);
-            int temp = alphaBeta(newNode, alpha, beta, depth + 1, limit, !maximize);
+            int temp = alphaBeta(newNode, alpha, beta, depth + 1, limit, !maximize);        //recursive call
             state.undoMove(move);
 
-            if (maximize) {
+            if (maximize) {         //if we are maximizing then see if temp is greater than alpha and set bestMove
                 if (temp > alpha) {
                     alpha = temp;
                     bestMove = move;
                 }
-            } else {
+            } else {                //if we are minimizing see if temp is smaller than beta
                 if (temp < beta) {
                     beta = temp;
                 }
@@ -85,12 +94,14 @@ public class Bowlingbal extends DraughtsPlayer {
 
     }
 
+    /*
+     Method to evaluate the draughts
+     */
     int evaluate(DraughtsState ds) {
 //obtain pieces array
         int[] pieces = ds.getPieces();
         int computedValue = 0;
-// compute a value for this state, e.g.
-// by compareing p[i] to WHITEPIECE, WHITEKING, etc
+// compute a value for this state
         for (int k = 0; k < pieces.length; k++) {
             if (ds.isWhiteToMove()) {
                 if (pieces[k] == 1) {   //count white pieces
@@ -99,13 +110,25 @@ public class Bowlingbal extends DraughtsPlayer {
                 if (pieces[k] == 3) {       //count white kings
                     computedValue += 5;
                 }
-            }
-            if (!(ds.isWhiteToMove())) {        //count black pieces
                 if (pieces[k] == 2) {
+                    computedValue--;        //count black pieces
+                }
+                if (pieces[k] == 4) {       //count black kings
+                    computedValue -= 5;
+                }
+            }
+            if (!(ds.isWhiteToMove())) {        
+                if (pieces[k] == 2) {       //count black pieces
                     computedValue++;
                 }
                 if (pieces[k] == 4) {       //count black kings
                     computedValue += 5;
+                }
+                if (pieces[k] == 1) {       //count white pieces
+                    computedValue--;
+                }
+                if (pieces[k] == 3) {       //count white kings
+                    computedValue -= 5;
                 }
             }
         }
