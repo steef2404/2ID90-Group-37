@@ -52,53 +52,51 @@ public class Bowlingbal extends DraughtsPlayer {
         }
         GameState state = node.getGameState();      //get state
 
-        if (state.isEndState() || depth > limit) {  //if it is the last state or the depth is over the limit return last evaluate
+        if (state.isEndState() || depth > limit) {  //if it is the last state or the depth is over the limit return last evaluate 
             return evaluate((DraughtsState) state);
         }
 
         List<Move> moves = state.getMoves();        //get all moves
         Move bestMove = moves.get(0);               //set best move random
 
-//        if (moves.size() == 1) {
-//            System.out.println("moves size = 1 and value = " + evaluate((DraughtsState) state));
-//            return evaluate((DraughtsState) state);
-//        }
+        if (moves.size() == 1) {
+            return evaluate((DraughtsState) state);
+        }
 
-        for (Move move : moves) {
-            state.doMove(move);
-            GameNode newNode = new GameNode(state);
-            int temp = alphaBeta(newNode, alpha, beta, depth + 1, limit, !maximize);        //recursive call
-            state.undoMove(move);
-
-            if (maximize) {         //if we are maximizing then see if temp is greater than alpha and set bestMove
+        if (maximize) {
+            int temp = Integer.MIN_VALUE;
+            for (Move move : moves) {
+                state.doMove(move);
+                GameNode newNode = new GameNode(state);
+                temp = Math.max(temp, alphaBeta(newNode, alpha, beta, depth + 1, limit, false)); //recursive call
                 if (temp > alpha) {
                     alpha = temp;
                     bestMove = move;
-                    //System.out.println("alpha = " + alpha);
                 }
-            } else {                //if we are minimizing see if temp is smaller than beta
-                if (temp < beta) {
-                    beta = temp;
-                    //System.out.println("beta= " + beta);
+                state.undoMove(move);
+                if (beta <= alpha) {
+                    node.setBestMove(bestMove);
+                    return beta;
                 }
             }
-            if (alpha >= beta) {
-                node.setBestMove(bestMove);
-                if (maximize) {
-                    return beta;
-                } else {
+            node.setBestMove(bestMove);
+            return alpha;
+        } else {
+            int temp = Integer.MAX_VALUE;
+            for (Move move : moves) {
+                state.doMove(move);
+                GameNode newNode = new GameNode(state);
+                temp = Math.min(temp, alphaBeta(newNode, alpha, beta, depth + 1, limit, true));        //recursive call
+                beta = Math.min(beta, temp);
+                state.undoMove(move);
+                if (beta <= alpha) {
+                    node.setBestMove(bestMove);
                     return alpha;
                 }
             }
-        }
-
-        node.setBestMove(bestMove);
-        if (maximize) {
-            return alpha;
-        } else {
+            node.setBestMove(bestMove);
             return beta;
         }
-
     }
 
     /*
@@ -107,92 +105,73 @@ public class Bowlingbal extends DraughtsPlayer {
     int evaluate(DraughtsState ds) {
 //obtain pieces array
         int[] pieces = ds.getPieces();
-        int computedValue = 0;
-// compute a value for this state
+        int computedValue;
+//        if (isWhite) {
+//            computedValue = countPieces(ds);
+//        } else {
+//            computedValue = -countPieces(ds);
+//        }
+        computedValue = endState(ds);
+
         for (int k = 0; k < pieces.length; k++) {
-            if (ds.isWhiteToMove()) {
-                //System.out.println("wit");
-                if (k <= 5 && k > 0) {
-                    if (pieces[k] == 1) //if you can make a king do it
-                    {
-                        computedValue += 10;
-                    }
+                if (pieces[k] == 1) {
+                    computedValue += 20;
                 }
-                else if (k % 10 == 5 || k % 10 == 6) {       //edges of board
-                    if (pieces[k] == 1) {   //count white pieces
-                        computedValue += 4;
-                    }
-                    if (pieces[k] == 3) {       //count white kings
-                        computedValue += 7;
-                    }
-                    if (pieces[k] == 2) {
-                        computedValue -= 4;        //count black pieces
-                    }
-                    if (pieces[k] == 4) {       //count black kings
-                        computedValue -= 7;
-                    }
-                } else {
-                    if (pieces[k] == 1) {   //count white pieces
-                        computedValue++;
-                    }
-                    if (pieces[k] == 3) {       //count white kings
-                        computedValue += 5;
-                    }
-                    if (pieces[k] == 2) {
-                        computedValue--;        //count black pieces
-                    }
-                    if (pieces[k] == 4) {       //count black kings
-                        computedValue -= 5;
-                    }
+                if (pieces[k] == 2) {
+                    computedValue -= 20;
                 }
-            }
-            if (!(ds.isWhiteToMove())) {
-                //System.out.println("zwart");
-                if (k >= 46) {
-                    if (pieces[k] == 2) //if you can make a king do it
-                    {
-                        computedValue += 10;
-                    }
+                if (pieces[k] == 3) {
+                    computedValue += 50;
                 }
-                else if (k % 10 == 5 || k % 10 == 6) {       //edges of board
-                    if (pieces[k] == 2) {       //count black pieces
-                        computedValue += 4;
-                    }
-                    if (pieces[k] == 4) {       //count black kings
-                        computedValue += 7;
-                    }
-                    if (pieces[k] == 1) {       //count white pieces
-                        computedValue -= 4;
-                    }
-                    if (pieces[k] == 3) {       //count white kings
-                        computedValue -= 7;
-                    }
-                } else {
-                    if (pieces[k] == 2) {       //count black pieces
-                        computedValue += 1;
-                    }
-                    if (pieces[k] == 4) {       //count black kings
-                        computedValue += 5;
-                    }
-                    if (pieces[k] == 1) {       //count white pieces
-                        computedValue -= 1;
-                    }
-                    if (pieces[k] == 3) {       //count white kings
-                        computedValue -= 5;
-                    }
-                }
-            }
+                if (pieces[k] == 4) {
+                    computedValue -= 50;
+                }          
+        }
+        if (!isWhite) {
+            computedValue = -computedValue;
         }
         //System.out.println("computedValue = " + computedValue);
         return computedValue;
     }
 
+    public int countPieces(DraughtsState ds) {
+        int score = 0;
+        int[] pieces = ds.getPieces();
+        for (int k = 0; k < pieces.length; k++) {
+            if (pieces[k] == 1) {
+                score += 20;
+            }
+            if (pieces[k] == 2) {
+                score -= 20;
+            }
+            if (pieces[k] == 3) {
+                score += 50;
+            }
+            if (pieces[k] == 4) {
+                score -= 50;
+            }
+        }
+        return score;
+    }
+
+    public int endState(DraughtsState ds) {
+        int win = 0;
+        if (isWhite != ds.isWhiteToMove() && ds.isEndState()) {
+            win += 100000;
+        }
+        if (isWhite == ds.isWhiteToMove() && ds.isEndState()) {
+            win -= 100000;
+        }
+        return win;
+    }
+
     Move bestMove;
+    Boolean isWhite;
 
     @Override
     public Move getMove(DraughtsState s) {
-        GameNode node = new GameNode(s);
-
+        GameNode node = new GameNode(s.clone());
+        isWhite = s.isWhiteToMove();
         try {
             int limit = 2;
             while (true) {
@@ -200,14 +179,13 @@ public class Bowlingbal extends DraughtsPlayer {
                 value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
                 //System.out.println("value: " + value);
                 limit++;
-                if (node.getBestMove() == null) {
+                if (node.getBestMove() == null) {           //never get here
                     System.out.println("null move");
                     List<Move> moves = node.getGameState().getMoves();
                     Move temp = moves.get(0);
                     node.setBestMove(temp);
                 }
                 bestMove = node.getBestMove();
-                System.out.println(node.getBestMove().toString());
             }
         } catch (AIStoppedException e) {
             //do nothing
