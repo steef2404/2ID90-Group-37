@@ -59,9 +59,9 @@ public class Bowlingbal extends DraughtsPlayer {
         List<Move> moves = state.getMoves();        //get all moves
         Move bestMove = moves.get(0);               //set best move random
 
-        if (moves.size() == 1) {
-            return evaluate((DraughtsState) state);
-        }
+//        if (moves.size() == 1) {
+//            return evaluate((DraughtsState) state);
+//        }
 
         if (maximize) {
             int temp = Integer.MIN_VALUE;
@@ -105,15 +105,15 @@ public class Bowlingbal extends DraughtsPlayer {
     int evaluate(DraughtsState ds) {
 //obtain pieces array
         int[] pieces = ds.getPieces();
-        int computedValue;
+        int computedValue = 0;
 //        if (isWhite) {
 //            computedValue = countPieces(ds);
 //        } else {
 //            computedValue = -countPieces(ds);
 //        }
-        computedValue = endState(ds);
+//        computedValue = endState(ds);
 
-        for (int k = 0; k < pieces.length; k++) {
+        for (int k = 1; k < pieces.length; k++) {
                 if (pieces[k] == 1) {
                     computedValue += 20;
                 }
