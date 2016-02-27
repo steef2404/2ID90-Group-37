@@ -62,7 +62,6 @@ public class Bowlingbal extends DraughtsPlayer {
 //        if (moves.size() == 1) {
 //            return evaluate((DraughtsState) state);
 //        }
-
         if (maximize) {
             int temp = Integer.MIN_VALUE;
             for (Move move : moves) {
@@ -106,30 +105,67 @@ public class Bowlingbal extends DraughtsPlayer {
 //obtain pieces array
         int[] pieces = ds.getPieces();
         int computedValue = 0;
-//        if (isWhite) {
-//            computedValue = countPieces(ds);
-//        } else {
-//            computedValue = -countPieces(ds);
-//        }
-//        computedValue = endState(ds);
 
-        for (int k = 1; k < pieces.length; k++) {
+        computedValue = countPieces(ds);
+
+        //computedValue += endState(ds);
+        for (int k = 1; k < pieces.length; k++) {       //go to the middle
+            if (22 <= k && k <= 24 || 27 <= k && k <= 29) {
                 if (pieces[k] == 1) {
-                    computedValue += 20;
+                    computedValue++;
                 }
                 if (pieces[k] == 2) {
-                    computedValue -= 20;
+                    computedValue--;
                 }
-                if (pieces[k] == 3) {
-                    computedValue += 50;
+            }
+
+            if (k % 10 == 1 || k % 10 == 2 || k % 10 == 3 || k % 10 == 4) {    //check if you are covered from white side
+                if (pieces[k] == 1) {
+                    if (pieces[k + 5] == 1 && pieces[k + 6] == 1) {
+                        computedValue += 2;
+                    }
                 }
-                if (pieces[k] == 4) {
-                    computedValue -= 50;
-                }          
+                if (k > 5) {
+                    if (pieces[k] == 2) {
+                        if (pieces[k - 4] == 2 && pieces[k - 5] == 2) {
+                            computedValue -= 2;
+                        }
+                    }
+                }
+            }
+
+            if (k % 10 == 7 || k % 10 == 8 || k % 10 == 9 || k % 10 == 0) {    //check if you are covered from black side
+                if (pieces[k] == 2) {
+                    if (pieces[k - 5] == 2 && pieces[k - 6] == 2) {
+                        computedValue -= 2;
+                    }
+                }
+                if (k < 47) {
+                    if (pieces[k] == 1) {
+                        if (pieces[k + 4] == 1 && pieces[k + 5] == 1) {
+                            computedValue += 2;
+                        }
+                    }
+                }
+            }
+
+//            if (pieces[k] == 1) {
+//                computedValue += 20;
+//            }
+//            if (pieces[k] == 2) {
+//                computedValue -= 20;
+//            }
+//            if (pieces[k] == 3) {
+//                computedValue += 50;
+//            }
+//            if (pieces[k] == 4) {
+//                computedValue -= 50;
+//            }
         }
         if (!isWhite) {
             computedValue = -computedValue;
         }
+
         //System.out.println("computedValue = " + computedValue);
         return computedValue;
     }
@@ -137,18 +173,26 @@ public class Bowlingbal extends DraughtsPlayer {
     public int countPieces(DraughtsState ds) {
         int score = 0;
         int[] pieces = ds.getPieces();
-        for (int k = 0; k < pieces.length; k++) {
+        for (int k = 1; k < pieces.length; k++) {
             if (pieces[k] == 1) {
-                score += 20;
+                score += 40;
             }
             if (pieces[k] == 2) {
-                score -= 20;
+                score -= 40;
             }
             if (pieces[k] == 3) {
-                score += 50;
+                if (k < 6) {
+                    score += 40;
+                } else {
+                    score += 100;
+                }
             }
             if (pieces[k] == 4) {
-                score -= 50;
+                if (k > 45) {
+                    score -= 40;
+                } else {
+                    score -= 100;
+                }
             }
         }
         return score;
@@ -156,17 +200,17 @@ public class Bowlingbal extends DraughtsPlayer {
 
     public int endState(DraughtsState ds) {
         int win = 0;
-        if (isWhite != ds.isWhiteToMove() && ds.isEndState()) {
+        if ((isWhite != ds.isWhiteToMove()) && ds.isEndState()) {
             win += 100000;
         }
-        if (isWhite == ds.isWhiteToMove() && ds.isEndState()) {
+        if ((isWhite == ds.isWhiteToMove()) && ds.isEndState()) {
             win -= 100000;
         }
         return win;
     }
 
-    Move bestMove;
-    Boolean isWhite;
+    Move bestMove;          //best move
+    Boolean isWhite;        //player is white or black
 
     @Override
     public Move getMove(DraughtsState s) {
@@ -179,6 +223,7 @@ public class Bowlingbal extends DraughtsPlayer {
                 value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
                 //System.out.println("value: " + value);
                 limit++;
+                //System.out.println("limit: " + limit);
                 if (node.getBestMove() == null) {           //never get here
                     System.out.println("null move");
                     List<Move> moves = node.getGameState().getMoves();
