@@ -32,21 +32,83 @@ public class OptimisticPlayer extends DraughtsPlayer {
     public int evaluate(DraughtsState ds) {
         int[] pieces = ds.getPieces();
         int computedValue = 0;
+        int count = 0;
         for (int k = 1; k < pieces.length; k++) {
-            if (pieces[k] == 1) {
-                computedValue += 20;
+            if (!isEndgame) {
+                if (pieces[k] == 1) {
+                    count++;
+                    computedValue += 40;
+                }
+                if (pieces[k] == 2) {
+                    count++;
+                    computedValue -= 40;
+                }
+                if (pieces[k] == 3) {
+                    count++;
+                    if (k < 6) {
+                        computedValue += 80;
+                    } else {
+                        computedValue += 150;
+                    }
+                }
+                if (pieces[k] == 4) {
+                    count++;
+                    if (k > 45) {
+                        computedValue -= 80;
+                    } else {
+                        computedValue -= 150;
+                    }
+                }
             }
-            if (pieces[k] == 2) {
-                computedValue -= 20;
-            }
-            if (pieces[k] == 3) {
-                computedValue += 50;
-            }
-            if (pieces[k] == 4) {
-                computedValue -= 50;
+            else {
+                if (pieces[k] == 1) {
+                    computedValue += 40;
+                }
+                if (pieces[k] == 2) {
+                    computedValue -= 40;
+                }
+                if (pieces[k] == 3) {
+                    if (k < 6) {
+                        computedValue += 100;
+                    } else {
+                        computedValue += 200;
+                    }
+                }
+                if (pieces[k] == 4) {
+                    if (k > 45) {
+                        computedValue -= 100;
+                    } else {
+                        computedValue -= 200;
+                    }
+                }
+                if (isWhite) {
+                    if (pieces[k] == 1) {
+                        if (k < 11) {//verder naar voren is beter                    
+                            computedValue += 8;
+                        } else if (k < 16) {
+                            computedValue += 6;
+                        } else if (k < 21) {
+                            computedValue += 4;
+                        }
+                    }
+                } else {
+                    if (pieces[k] == 2) {
+                        if (k > 45) {//verder naar voren is beter                    
+                            computedValue -= 8;
+                        } else if (k > 35) {
+                            computedValue -= 6;
+                        } else if (k > 25) {
+                            computedValue -= 4;
+                        }
+                    }
+                }
             }
         }
-         if (!isWhite) {
+        if (count <= 10) {
+            System.out.println(count + " count endgame true");
+            isEndgame = true;
+        }
+        if (!isWhite) {
             computedValue = -computedValue;
         }
         return computedValue;
@@ -105,16 +167,17 @@ public class OptimisticPlayer extends DraughtsPlayer {
             return beta;
         }
     }
-    
+
     Move bestMove;
     Boolean isWhite;
+    Boolean isEndgame = false;
 
     @Override
     /**
      * @return a random move *
      */
     public Move getMove(DraughtsState s) {
-      GameNode node = new GameNode(s.clone());
+        GameNode node = new GameNode(s.clone());
         isWhite = s.isWhiteToMove();
         try {
             int limit = 2;
@@ -123,7 +186,7 @@ public class OptimisticPlayer extends DraughtsPlayer {
                 value = alphaBeta(node, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, limit, true); //find best move
                 //System.out.println("value: " + value);
                 limit++;
-                //System.out.println("limit: " + limit);
+                System.out.println("limit optimistic: " + limit);
                 if (node.getBestMove() == null) {           //never get here
                     System.out.println("null move");
                     List<Move> moves = node.getGameState().getMoves();
