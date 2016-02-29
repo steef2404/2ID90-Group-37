@@ -1,5 +1,7 @@
 package nl.tue.s2id90.group37;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
@@ -29,7 +31,7 @@ public class Bowlingbal extends DraughtsPlayer {
 
     int value = 0;
 
-    public int evaluate(DraughtsState ds) {
+    public int evaluate(DraughtsState ds, int depth) {
         int[] pieces = ds.getPieces();
         int computedValue = 0;
         int count = 0;
@@ -59,13 +61,12 @@ public class Bowlingbal extends DraughtsPlayer {
                         computedValue -= 150;
                     }
                 }
-            }
-            else {
+            } else {
                 if (pieces[k] == 1) {
-                    computedValue += 40;
+                    computedValue += 49;
                 }
                 if (pieces[k] == 2) {
-                    computedValue -= 40;
+                    computedValue -= 49;
                 }
                 if (pieces[k] == 3) {
                     if (k < 6) {
@@ -104,9 +105,11 @@ public class Bowlingbal extends DraughtsPlayer {
                 }
             }
         }
-        if (count <= 10) {
-            System.out.println(count + " count endgame true");
-            isEndgame = true;
+        if (depth == 3) {
+            if (count <= 10) {
+                System.out.println(count + " count endgame true");
+                isEndgame = true;
+            }
         }
         if (!isWhite) {
             computedValue = -computedValue;
@@ -123,7 +126,7 @@ public class Bowlingbal extends DraughtsPlayer {
         GameState state = node.getGameState();      //get state
 
         if (state.isEndState() || depth > limit) {  //if it is the last state or the depth is over the limit return last evaluate 
-            return evaluate((DraughtsState) state);
+            return evaluate((DraughtsState) state, depth);
         }
 
         List<Move> moves = state.getMoves();        //get all moves
