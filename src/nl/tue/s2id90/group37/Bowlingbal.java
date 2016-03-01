@@ -115,11 +115,9 @@ public class Bowlingbal extends DraughtsPlayer {
         int kingsWhite = 0;
         int kingsBlack = 0;
 
-        // computedValue = countPieces(ds);
         //      computedValue += endState(ds);
-        for (int k = 1; k < pieces.length; k++) {       //go to the middle
-
-            if (!isEndgame) {
+        for (int k = 1; k < pieces.length; k++) {       //loopt over alles
+            if (!isEndgame) {                              //niet endgame betekent dus meer dan 10 stukken in totaal
                 // System.out.println("niet endgame");
                 if (pieces[k] == 1) {
                     count++;
@@ -131,7 +129,7 @@ public class Bowlingbal extends DraughtsPlayer {
                 }
                 if (pieces[k] == 3) {
                     count++;
-                    if (k < 6) {
+                    if (k < 6) {                        // op achterlijn is koning minder waard zodat hij koning wilt maken
                         computedValue += 80;
                     } else {
                         computedValue += 150;
@@ -139,13 +137,13 @@ public class Bowlingbal extends DraughtsPlayer {
                 }
                 if (pieces[k] == 4) {
                     count++;
-                    if (k > 45) {
+                    if (k > 45) {                           // op achterlijn is koning minder waard zodat hij koning wilt maken
                         computedValue -= 80;
                     } else {
                         computedValue -= 150;
                     }
                 }
-                if (k % 10 == 5 || k % 10 == 6) {
+                if (k % 10 == 5 || k % 10 == 6) {           //zijkanten zijn slecht
                     if (pieces[k] == 1) {
                         computedValue -= 4;
                     }
@@ -153,7 +151,7 @@ public class Bowlingbal extends DraughtsPlayer {
                         computedValue += 4;
                     }
                 }
-                if (22 <= k && k <= 24 || 27 <= k && k <= 29) {
+                if (22 <= k && k <= 24 || 27 <= k && k <= 29) {     //in het midden is beter
                     if (pieces[k] == 1) {
                         computedValue++;
                     }
@@ -162,7 +160,7 @@ public class Bowlingbal extends DraughtsPlayer {
                     }
                 }
 
-                if (k % 10 == 1 || k % 10 == 2 || k % 10 == 3 || k % 10 == 4) {    //check if you are covered from white side
+                if (k % 10 == 1 || k % 10 == 2 || k % 10 == 3 || k % 10 == 4) {    //check if you are covered from white side    dus of er 2 mannetjes achter je staan
                     if (isWhite) {
                         if (pieces[k] == 1) {
                             if (pieces[k + 5] == 1 && pieces[k + 6] == 1) {
@@ -177,7 +175,7 @@ public class Bowlingbal extends DraughtsPlayer {
                         }
                     }
                 }
-                if (k % 10 == 7 || k % 10 == 8 || k % 10 == 9 || k % 10 == 0) {    //check if you are covered from black side
+                if (k % 10 == 7 || k % 10 == 8 || k % 10 == 9 || k % 10 == 0) {    //check if you are covered from black side    dus of er 2 mannetjes achter je staan
                     if (!isWhite) {
                         if (pieces[k] == 2) {
                             if (pieces[k - 5] == 2 && pieces[k - 6] == 2) {
@@ -192,20 +190,8 @@ public class Bowlingbal extends DraughtsPlayer {
                         }
                     }
                 }
-//            if (pieces[k] == 1) {
-//                computedValue += 20;
-//            }
-//            if (pieces[k] == 2) {
-//                computedValue -= 20;
-//            }
-//            if (pieces[k] == 3) {
-//                computedValue += 50;
-//            }
-//            if (pieces[k] == 4) {
-//                computedValue -= 50;
-//            }
-            } else {
-                if (!multipleKings) {
+            } else {                            //dus wel endgame is andere heuristics.    waarom? uhm minder stukken dus koning belangrijker
+                if (!multipleKings) {              // als er meerdere koningen zijn doe iets anders om te proberen om de dans der koningen te avoiden
                     if (pieces[k] == 1) {
                         computedValue += 50;
                     }
@@ -229,7 +215,6 @@ public class Bowlingbal extends DraughtsPlayer {
                         }
                     }
                 } else {                        //meerdere koningen dus andere heuristics
-                    //System.out.println("meerdere konings");
                     if (pieces[k] == 1) {
                         computedValue += 50;
                     }
@@ -238,7 +223,7 @@ public class Bowlingbal extends DraughtsPlayer {
                     }
                     if (pieces[k] == 3) {
                         kingsWhite++;
-                        if (stupidKings.contains(k)) {
+                        if (stupidKings.contains(k)) {      // ze bleven maaar naa rlinksboven gaan dus fak dat
                             computedValue--;
                         } else {
                             computedValue += 101;
@@ -246,7 +231,7 @@ public class Bowlingbal extends DraughtsPlayer {
                     }
                     if (pieces[k] == 4) {
                         kingsBlack++;
-                        if (stupidKings.contains(k)) {
+                        if (stupidKings.contains(k)) {      // ze bleven maaar naa rlinksboven gaan dus fak dat
                             computedValue++;
                         } else {
                             computedValue -= 101;
@@ -262,8 +247,8 @@ public class Bowlingbal extends DraughtsPlayer {
                         } else if (k < 21) {
                             computedValue += 30;
                         }
-                        boolean noEnemies = true;
-                        for (int j = k; j > 5; j -= 10) {         //alle velden in die rijen, niet een veld
+                        boolean noEnemies = true;               // dit is dus om te kijken of de rij voor je en die eraan liggen, of die vrij zijn van tegenstanders
+                        for (int j = k; j > 5; j -= 10) {         //kijk voor alles boven hem
                             if (!noEnemies) {
                                 //System.out.println("hier komt ie niet, toch?");
                                 break;
@@ -320,11 +305,11 @@ public class Bowlingbal extends DraughtsPlayer {
                                 }
                             }
                         }
-                        if (noEnemies) {
+                        if (noEnemies) {        //geen vijanden voor je geeft bonus want je kan dan koning maken
                             computedValue += 35;
                         }
                     }
-                    if (pieces[k] == 3) {
+                    if (pieces[k] == 3) {       //koning op diagonaal en/of midden geeft meer punten
                         if (diagonals.contains(k)) {
                             computedValue += 2;
                         }
@@ -333,7 +318,7 @@ public class Bowlingbal extends DraughtsPlayer {
                             computedValue += 24;
                         }
                     }
-                } else {
+                } else {    //zwart
                     if (pieces[k] == 2) {
                         if (k < 11) {//verder naar voren is beter                    
                             computedValue -= 38;
@@ -342,7 +327,7 @@ public class Bowlingbal extends DraughtsPlayer {
                         } else if (k < 21) {
                             computedValue -= 30;
                         }
-                        Boolean noEnemies = true;
+                        Boolean noEnemies = true;           // dit is dus om te kijken of de rij voor je en die eraan liggen, of die vrij zijn van tegenstanders
                         for (int j = k; j < 46; j += 10) {
                             if (!noEnemies) {
                                 break;
@@ -399,12 +384,12 @@ public class Bowlingbal extends DraughtsPlayer {
                                 }
                             }
                         }
-                        if (noEnemies) {
+                        if (noEnemies) {         //geen vijanden voor je geeft bonus want je kan dan koning maken
                             //System.out.println("bonus lege rij");
                             computedValue -= 35;
                         }
                     }
-                    if (pieces[k] == 4) {
+                    if (pieces[k] == 4) {       //koning op diagonaal en/of midden geeft meer punten
                         if (diagonals.contains(k)) {
                             computedValue -= 2;
                         }
@@ -416,20 +401,20 @@ public class Bowlingbal extends DraughtsPlayer {
                 }
             }
         }
-        if (depth == 3) {
+        if (depth == 3) {           //// depth == 3 omdat je dan in een niet te diepe iteratie zit zodat je niet al 10 zetten van te voren denkt dat er meerdere koningen zijn
             if (kingsWhite >= 1 && kingsBlack >= 1) {
                 multipleKings = true;
             } else {
                 multipleKings = false;
             }
         }
-        if (depth == 3) {
+        if (depth == 3) {       // depth == 3 omdat je dan in een niet te diepe iteratie zit zodat je niet al 10 zetten van te voren denkt dat het endgame is 
             if (count <= 10) {
                 //System.out.println(count + " count endgame true");
                 isEndgame = true;
             }
         }
-        if (!isWhite) {
+        if (!isWhite) {     //zwart is omgekeerde van wit dus draai om
             computedValue = -computedValue;
         }
 
@@ -445,16 +430,16 @@ public class Bowlingbal extends DraughtsPlayer {
 //        return score;
 //    }
 
-    public int endState(DraughtsState ds) {
-        int win = 0;
-        if ((isWhite != ds.isWhiteToMove()) && ds.isEndState()) {
-            win += 100000;
-        }
-//        if ((isWhite == ds.isWhiteToMove()) && ds.isEndState()) {
-//            win -= 100000;
+//    public int endState(DraughtsState ds) {
+//        int win = 0;
+//        if ((isWhite != ds.isWhiteToMove()) && ds.isEndState()) {
+//            win += 100000;
 //        }
-        return win;
-    }
+////        if ((isWhite == ds.isWhiteToMove()) && ds.isEndState()) {
+////            win -= 100000;
+////        }
+//        return win;
+//    }
 
     Move bestMove;          //best move
     Boolean isWhite;        //player is white or black
@@ -463,7 +448,7 @@ public class Bowlingbal extends DraughtsPlayer {
     List diagonals = Arrays.asList(1, 6, 7, 11, 12, 17, 18, 22, 23, 28, 29, 33, 34, 39, 40, 44, 45, 50, 5, 10, 14, 19, 23, 28, 32, 37, 41, 46);
     List center = Arrays.asList(22, 23, 27, 28, 29, 32, 33);
     List stupidKings = Arrays.asList(2, 7, 11, 16, 1, 6);
-    List c0 = Arrays.asList(6, 16, 26, 36, 46);
+    List c0 = Arrays.asList(6, 16, 26, 36, 46);     //column 1
     List c1 = Arrays.asList(1, 11, 21, 31, 41);
     List c2 = Arrays.asList(7, 17, 27, 37, 47);
     List c3 = Arrays.asList(2, 12, 22, 32, 42);

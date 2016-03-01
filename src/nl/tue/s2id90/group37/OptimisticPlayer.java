@@ -37,8 +37,8 @@ public class OptimisticPlayer extends DraughtsPlayer {
         int[] pieces = ds.getPieces();
         int computedValue = 0;
         int count = 0;
-        for (int k = 1; k < pieces.length; k++) {
-            if (!isEndgame) {
+        for (int k = 1; k < pieces.length; k++) {       //loop over alles
+            if (!isEndgame) {           //niet endgame betekent dus meer dan 10 stukken in totaal
                 if (pieces[k] == 1) {
                     count++;
                     computedValue += 40;
@@ -49,7 +49,7 @@ public class OptimisticPlayer extends DraughtsPlayer {
                 }
                 if (pieces[k] == 3) {
                     count++;
-                    if (k < 6) {
+                    if (k < 6) {                // op achterlijn is koning minder waard zodat hij koning wilt maken
                         computedValue += 80;
                     } else {
                         computedValue += 150;
@@ -58,12 +58,12 @@ public class OptimisticPlayer extends DraughtsPlayer {
                 if (pieces[k] == 4) {
                     count++;
                     if (k > 45) {
-                        computedValue -= 80;
+                        computedValue -= 80;    // op achterlijn is koning minder waard zodat hij koning wilt maken
                     } else {
                         computedValue -= 150;
                     }
                 }
-            } else {
+            } else {                            //dus wel endgame is andere heuristics.    waarom? uhm minder stukken dus koning belangrijker
                 if (pieces[k] == 1) {
                     computedValue += 49;
                 }
@@ -72,21 +72,21 @@ public class OptimisticPlayer extends DraughtsPlayer {
                 }
                 if (pieces[k] == 3) {
                     if (k < 6) {
-                        computedValue += 100;
+                        computedValue += 100;   // op achterlijn is koning minder waard zodat hij koning wilt maken
                     } else {
                         computedValue += 200;
                     }
                 }
                 if (pieces[k] == 4) {
                     if (k > 45) {
-                        computedValue -= 100;
+                        computedValue -= 100;   // op achterlijn is koning minder waard zodat hij koning wilt maken
                     } else {
                         computedValue -= 200;
                     }
                 }
                 if (isWhite) {
                     if (pieces[k] == 1) {
-                        if (k < 11) {//verder naar voren is beter                    
+                        if (k < 11) {//verder naar voren is beter    want je wilt koning                
                             computedValue += 8;
                         } else if (k < 16) {
                             computedValue += 6;
@@ -96,7 +96,7 @@ public class OptimisticPlayer extends DraughtsPlayer {
                     }
                 } else {
                     if (pieces[k] == 2) {
-                        if (k > 45) {//verder naar voren is beter                    
+                        if (k > 45) {//verder naar voren is beter          want je wilt koning                   
                             computedValue -= 8;
                         } else if (k > 35) {
                             computedValue -= 6;
@@ -107,7 +107,7 @@ public class OptimisticPlayer extends DraughtsPlayer {
                 }
             }
         }
-        if (depth == 3) {
+        if (depth == 3) {               // depth == 3 omdat je dan in een niet te diepe iteratie zit zodat je niet al 10 zetten van te voren denkt dat het endgame is 
             if (count <= 10) {
                 //System.out.println(count + " count endgame true");
                 isEndgame = true;
